@@ -1,8 +1,20 @@
-from med_agent import TrueMedicationAgent
+import socket
+import sys
 
-agent = TrueMedicationAgent()
 
-# Test if AI works
-result = agent.analyze_symptoms("headache", [])
-print("Result type:", type(result))
-print("First 100 chars:", str(result)[:100])
+def check_port(host="localhost", port=8000):
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(2)
+        result = sock.connect_ex((host, port))
+        sock.close()
+        return result == 0
+    except:
+        return False
+
+
+if check_port():
+    print("✅ Port 8000 is open and accepting connections")
+else:
+    print("❌ Port 8000 is closed. Your server is not running.")
+    print("Start your server with: uvicorn main:app --reload --port 8000")

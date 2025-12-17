@@ -121,12 +121,14 @@ with tab1:
     st.subheader("📅 Today's Schedule")
     conn = sqlite3.connect("meds.db")
     c = conn.cursor()
-    c.execute("SELECT name, dosage, frequency FROM medications")
+    c.execute(
+        "SELECT id, name, dosage, frequency FROM medications"
+    )  # CHANGED: Added id
     meds = c.fetchall()
     conn.close()
 
     if meds:
-        for name, dosage, freq in meds:
+        for med_id, name, dosage, freq in meds:  # CHANGED: Unpack med_id
             col1, col2, col3 = st.columns([3, 2, 1])
             with col1:
                 st.write(f"**{name}**")
@@ -136,11 +138,10 @@ with tab1:
                 if freq:
                     st.write(freq)
             with col3:
-                if st.button("✅ Taken", key=f"dash_taken_{name}"):
+                # CHANGED: Key uses med_id instead of name
+                if st.button("✅ Taken", key=f"dash_taken_{med_id}"):
                     conn = sqlite3.connect("meds.db")
                     c = conn.cursor()
-                    c.execute("SELECT id FROM medications WHERE name = ?", (name,))
-                    med_id = c.fetchone()[0]
                     c.execute(
                         "INSERT INTO dose_logs (medication_id) VALUES (?)", (med_id,)
                     )
