@@ -61,16 +61,12 @@ init_db()
 # Initialize AI Agent
 @st.cache_resource
 def get_agent():
-    # Check Streamlit secrets FIRST, then local file
+
+    # ONLY use st.secrets - nothing else
     if "OPENAI_API_KEY" in st.secrets:
         api_key = st.secrets["OPENAI_API_KEY"]
     else:
-        try:
-            from my_secrets import OPENAI_API_KEY
-
-            api_key = OPENAI_API_KEY
-        except ImportError:
-            api_key = None
+        api_key = None
 
     return TrueMedicationAgent(openai_key=api_key)
 
@@ -509,22 +505,20 @@ with tab3:
 
 # --- TAB 4: STATUS ---
 with tab4:
-    st.header("🔌 System Status")
-
-    # AI Status
+    # AI Status - ONLY checks st.secrets
     st.subheader("🧠 AI Status")
-    try:
-        from my_secrets import OPENAI_API_KEY
 
-        if OPENAI_API_KEY and OPENAI_API_KEY.startswith("sk-"):
-            st.success("✅ OpenAI Connected")
+    if "OPENAI_API_KEY" in st.secrets:
+        api_key = st.secrets["OPENAI_API_KEY"]
+        if api_key and api_key.startswith("sk-"):
+            st.success("✅ OpenAI Connected via Streamlit Secrets")
             st.caption("AI analysis enabled")
         else:
-            st.warning("⚠️ OpenAI Not Configured")
-            st.caption("Add API key to my_secrets.py for AI features")
-    except ImportError:
+            st.warning("⚠️ Invalid OpenAI Key in Streamlit Secrets")
+            st.caption("Key should start with 'sk-'")
+    else:
         st.warning("⚠️ OpenAI Not Configured")
-        st.caption("Create my_secrets.py with OPENAI_API_KEY")
+        st.caption("Add OPENAI_API_KEY to Streamlit Cloud Secrets")
 
     # FDA API Status
     st.subheader("💊 FDA API Status")
