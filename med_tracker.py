@@ -58,23 +58,21 @@ init_db()
 
 
 # Initialize AI Agent
+# Initialize AI Agent
 @st.cache_resource
 def get_agent():
-    try:
-        # Try to import from my_secrets.py
+    # Check Streamlit secrets FIRST, then local file
+    if "OPENAI_API_KEY" in st.secrets:
+        api_key = st.secrets["OPENAI_API_KEY"]
+    else:
         try:
             from my_secrets import OPENAI_API_KEY
 
             api_key = OPENAI_API_KEY
         except ImportError:
             api_key = None
-            st.sidebar.info(
-                "ℹ️ No OpenAI key found in my_secrets.py - using basic features"
-            )
 
-        return TrueMedicationAgent(openai_key=api_key)
-    except Exception as e:
-        return TrueMedicationAgent(openai_key="")
+    return TrueMedicationAgent(openai_key=api_key)
 
 
 agent = get_agent()
